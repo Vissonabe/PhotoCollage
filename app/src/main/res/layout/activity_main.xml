@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="#abcab4"
+    android:id="@+id/root_frame_layout"
+    tools:context=".MainActivity">
+
+    <com.white_horse.photocollage.view.polygon.PolygonView
+        android:id="@+id/test_polygon"
+        android:tag="root_polygon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <com.white_horse.photocollage.view.GuidelineView
+        android:id="@+id/guideline_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</FrameLayout>
