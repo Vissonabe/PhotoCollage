@@ -23,80 +23,96 @@ class HorizontalSplitter(val tag : String): IViewSplitter {
     private fun getV1Points(rectData: RectData,
                             edgeList: List<Edge>,
                             firstIntersectEdge: Edge,
-                            secondIntersectEdge: Edge): List<Point> {
+                            secondIntersectEdge: Edge): List<Point>? {
         val list = mutableListOf<Point>()
         var index = 0
-        while (index < edgeList.size) {
-            val edge = edgeList[index]
-            if (edge.hasIntersection) {
-                list.add(
-                    Point(
-                        abs(edge.start.rawX - rectData.start_x),
-                        abs(edge.start.rawY - rectData.start_y),
-                        rawX = edge.start.rawX,
-                        rawY = edge.start.rawY
+
+        if(edgeList.isNotEmpty()) {
+            while (index < edgeList.size) {
+                val edge = edgeList[index]
+                if (edge.hasIntersection) {
+                    list.add(
+                        Point(
+                            abs(edge.start.rawX - rectData.start_x),
+                            abs(edge.start.rawY - rectData.start_y),
+                            rawX = edge.start.rawX,
+                            rawY = edge.start.rawY
+                        )
                     )
-                )
-                list.add(
-                    Point(
-                        abs(edge.intersectionPoint.x - rectData.start_x),
-                        abs(rectData.start_y - edge.intersectionPoint.rawY),
-                        rawX = edge.intersectionPoint.rawX,
-                        rawY = edge.intersectionPoint.rawY
+                    list.add(
+                        Point(
+                            abs(edge.intersectionPoint.x - rectData.start_x),
+                            abs(rectData.start_y - edge.intersectionPoint.rawY),
+                            rawX = edge.intersectionPoint.rawX,
+                            rawY = edge.intersectionPoint.rawY
+                        )
                     )
-                )
-                list.add(
-                    Point(
-                        abs(secondIntersectEdge.intersectionPoint.x - rectData.start_x),
-                        abs(rectData.start_y - secondIntersectEdge.intersectionPoint.rawY),
-                        rawX = secondIntersectEdge.intersectionPoint.rawX,
-                        rawY = secondIntersectEdge.intersectionPoint.rawY
+                    list.add(
+                        Point(
+                            abs(secondIntersectEdge.intersectionPoint.x - rectData.start_x),
+                            abs(rectData.start_y - secondIntersectEdge.intersectionPoint.rawY),
+                            rawX = secondIntersectEdge.intersectionPoint.rawX,
+                            rawY = secondIntersectEdge.intersectionPoint.rawY
+                        )
+                    ) //(edge.intersectionPoint)
+                    index = secondIntersectEdge.index + 1
+                } else {
+                    list.add(
+                        Point(
+                            abs(edge.start.rawX - rectData.start_x),
+                            abs(edge.start.rawY - rectData.start_y),
+                            rawX = edge.start.rawX,
+                            rawY = edge.start.rawY
+                        )
                     )
-                ) //(edge.intersectionPoint)
-                index = secondIntersectEdge.index + 1
-            } else {
-                list.add(
-                    Point(
-                        abs(edge.start.rawX - rectData.start_x),
-                        abs(edge.start.rawY - rectData.start_y),
-                        rawX = edge.start.rawX,
-                        rawY = edge.start.rawY
-                    )
-                )
-                index++
+                    index++
+                }
             }
+            return list
+        } else {
+            return null
         }
-        return list
     }
 
     private fun getV2Points(rectData: RectData, edgeList: List<Edge>,
                             firstIntersectEdge: Edge,
-                            secondIntersectEdge: Edge): List<Point> {
+                            secondIntersectEdge: Edge): List<Point>? {
         val v2PointsList = mutableListOf<Point>()
         var index = firstIntersectEdge.index
 
-        while (index < edgeList.size) {
-            val edge = edgeList[index]
-            if (edge.hasIntersection) {
-                if (edge.index == secondIntersectEdge.index) {
-                    v2PointsList.add(
-                        Point(
-                            abs(edge.intersectionPoint.rawX - rectData.start_x),
-                            abs(rectData.start_y - edge.intersectionPoint.rawY),
-                            rawX = edge.intersectionPoint.rawX,
-                            rawY = edge.intersectionPoint.rawY
+        if(edgeList.isNotEmpty() && index >= 0) {
+            while (index < edgeList.size) {
+                val edge = edgeList[index]
+                if (edge.hasIntersection) {
+                    if (edge.index == secondIntersectEdge.index) {
+                        v2PointsList.add(
+                            Point(
+                                abs(edge.intersectionPoint.rawX - rectData.start_x),
+                                abs(rectData.start_y - edge.intersectionPoint.rawY),
+                                rawX = edge.intersectionPoint.rawX,
+                                rawY = edge.intersectionPoint.rawY
+                            )
                         )
-                    )
-                    break
+                        break
+                    } else {
+                        v2PointsList.add(
+                            Point(
+                                abs(edge.intersectionPoint.rawX - rectData.start_x),
+                                abs(rectData.start_y - edge.intersectionPoint.rawY),
+                                rawX = edge.intersectionPoint.rawX,
+                                rawY = edge.intersectionPoint.rawY
+                            )
+                        )
+                        v2PointsList.add(
+                            Point(
+                                abs(edge.end.rawX - rectData.start_x),
+                                abs(rectData.start_y - edge.end.rawY),
+                                rawX = edge.end.rawX,
+                                rawY = edge.end.rawY
+                            )
+                        )
+                    }
                 } else {
-                    v2PointsList.add(
-                        Point(
-                            abs(edge.intersectionPoint.rawX - rectData.start_x),
-                            abs(rectData.start_y - edge.intersectionPoint.rawY),
-                            rawX = edge.intersectionPoint.rawX,
-                            rawY = edge.intersectionPoint.rawY
-                        )
-                    )
                     v2PointsList.add(
                         Point(
                             abs(edge.end.rawX - rectData.start_x),
@@ -106,20 +122,13 @@ class HorizontalSplitter(val tag : String): IViewSplitter {
                         )
                     )
                 }
-            } else {
-                v2PointsList.add(
-                    Point(
-                        abs(edge.end.rawX - rectData.start_x),
-                        abs(rectData.start_y - edge.end.rawY),
-                        rawX = edge.end.rawX,
-                        rawY = edge.end.rawY
-                    )
-                )
+                index++
             }
-            index++
-        }
 
-        return v2PointsList
+            return v2PointsList
+        } else {
+            return null
+        }
     }
 
     private fun getTempPoints(edgeList: List<Edge>,
@@ -196,7 +205,6 @@ class HorizontalSplitter(val tag : String): IViewSplitter {
     override suspend fun getPolygonSplit(p1: Point, p2: Point, rectData: RectData, edgeList: List<Edge>,
                                  firstIntersectEdge: Edge,
                                  secondIntersectEdge: Edge): PolygonSplit? {
-        Log.d("xxx", "parent rect data $rectData")
 
         calculateMinMax(p1, p2, rectData)
         val topRect = RectData(
@@ -220,6 +228,11 @@ class HorizontalSplitter(val tag : String): IViewSplitter {
         val v2Rect = if(isTopAligned) bottomRect else topRect
         val v1PointsList = getV1Points(v1Rect, edgeList, firstIntersectEdge, secondIntersectEdge)
         val v2PointsList = getV2Points(v2Rect, edgeList, firstIntersectEdge, secondIntersectEdge)
+
+        if(v1PointsList == null || v2PointsList == null) {
+            return null
+        }
+
         val v1Height = if(isTopAligned) topViewHeight else bottomViewHeight
         val v2Height = if(isTopAligned) bottomViewHeight else topViewHeight
 
@@ -262,6 +275,7 @@ class HorizontalSplitter(val tag : String): IViewSplitter {
         min = min(d_dash.rawY, u_dash.rawY)
         topViewHeight = abs(max - rectData.start_y)
         bottomViewHeight = abs(rectData.end_y - min)
+        Log.d("xxx", "parent rect data hori $rectData")
         Log.d("xxx vertical", "max = $max, min = $min, v1width = $viewHeight ,  v2width = $bottomViewHeight")
     }
 }

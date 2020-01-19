@@ -2,12 +2,16 @@ package com.white_horse.photocollage
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import com.white_horse.photocollage.models.ChildPolygonsData
 import kotlinx.android.synthetic.main.activity_main.*
 import com.white_horse.photocollage.models.Point
 import com.white_horse.photocollage.models.RectData
+import com.white_horse.photocollage.models.ViewTree
 import com.white_horse.photocollage.utils.Action
-import com.white_horse.photocollage.view.polygon.PolygonView
+import com.white_horse.photocollage.utils.addChildren
+import com.white_horse.photocollage.utils.getActivePolygonsList
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 
 
@@ -16,14 +20,12 @@ class MainActivity : AppCompatActivity() {
     val pointsList = mutableListOf<Point>()
     var x : Float = 0f
     var y = 0f
-    val allViewsStack = Stack<PolygonView>()
-    val activeViewStack = Stack<PolygonView>()
+    val undoViewStack = Stack<Int>()
+    lateinit var rootViewTree : ViewTree
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        allViewsStack.add(test_polygon)
-
         x = resources.displayMetrics.widthPixels.toFloat()
         y = resources.displayMetrics.heightPixels.toFloat()
 
@@ -36,13 +38,17 @@ class MainActivity : AppCompatActivity() {
         test_polygon.setVertexPoints(pointsList, x , y,
             RectData(0f, 1080f, 0f, 1920f)
         )
+        test_polygon.setUniqueId(0)
+        rootViewTree = ViewTree(test_polygon)
     }
 
     val viewAction = object :
-        Action<Pair<PolygonView, PolygonView>> {
-        override fun run(value: Pair<PolygonView, PolygonView>) {
-            allViewsStack.add(value.first)
-            allViewsStack.add(value.second)
+        Action<ChildPolygonsData> {
+        override fun run(value: ChildPolygonsData) {
+            GlobalScope.launch {
+                undoViewStack.add(value.parentPolygonId)
+                addChildren(rootViewTree, value)
+            }
         }
     }
 
@@ -54,11 +60,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun splitView(start : Point, end : Point) {
-        if(allViewsStack.size == 1) {
-            allViewsStack.peek().splitView(start, end)
-        } else if(allViewsStack.size > 1) {
-            allViewsStack[allViewsStack.size - 1].splitView(start, end)
-            allViewsStack[allViewsStack.size - 2].splitView(start, end)
+        GlobalScope.launch {
+            getActivePolygonsList(rootViewTree).forEach {
+                it.splitView(start, end)
+            }
         }
     }
 

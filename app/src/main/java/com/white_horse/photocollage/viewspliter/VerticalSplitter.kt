@@ -26,9 +26,11 @@ class VerticalSplitter(val tag : String) : IViewSplitter {
 
     private fun getV1Points(rectData: RectData, edgeList: List<Edge>,
                             firstIntersectEdge: Edge,
-                            secondIntersectEdge: Edge): List<Point> {
+                            secondIntersectEdge: Edge): List<Point>? {
             val list = mutableListOf<Point>()
             var index = 0
+
+        if(edgeList.isNotEmpty()) {
             while (index < edgeList.size) {
                 val edge = edgeList[index]
                 if (edge.hasIntersection) {
@@ -70,14 +72,18 @@ class VerticalSplitter(val tag : String) : IViewSplitter {
                 }
             }
             return list
+        }else {
+            return null
+        }
     }
 
     private fun getV2Points(rectData: RectData, edgeList: List<Edge>,
                             firstIntersectEdge: Edge,
-                            secondIntersectEdge: Edge): List<Point> {
+                            secondIntersectEdge: Edge): List<Point>? {
             val v2PointsList = mutableListOf<Point>()
             var index = firstIntersectEdge.index
 
+        if(index >= 0) {
             while (index < edgeList.size) {
                 val edge = edgeList[index]
                 if (edge.hasIntersection) {
@@ -123,6 +129,9 @@ class VerticalSplitter(val tag : String) : IViewSplitter {
             }
 
             return v2PointsList
+        } else {
+            return null
+        }
     }
 
     private fun getTempPoints(edgeList: List<Edge>,
@@ -199,6 +208,11 @@ class VerticalSplitter(val tag : String) : IViewSplitter {
     override suspend fun getPolygonSplit(p1 : Point, p2 : Point, rectData: RectData, edgeList: List<Edge>,
                                  firstIntersectEdge: Edge,
                                  secondIntersectEdge: Edge): PolygonSplit? {
+
+        if(edgeList.isEmpty()) {
+             return null
+        }
+
         caculateMinMax(p1, p2, rectData)
         val leftRect = RectData(
             rectData.start_x,
@@ -222,6 +236,11 @@ class VerticalSplitter(val tag : String) : IViewSplitter {
         val v2Rect = if(isLeftAligned) rightRect else leftRect
         val v1PointsList = getV1Points(v1Rect, edgeList, firstIntersectEdge, secondIntersectEdge)
         val v2PointsList = getV2Points(v2Rect, edgeList, firstIntersectEdge, secondIntersectEdge)
+
+        if(v1PointsList == null || v2PointsList == null) {
+            return null
+        }
+
         val v1Width = if(isLeftAligned) leftViewWidth else rightViewWidth
         val v2Width = if(isLeftAligned) rightViewWidth else leftViewWidth
 
@@ -258,9 +277,10 @@ class VerticalSplitter(val tag : String) : IViewSplitter {
 
     fun caculateMinMax(d_dash : Point, u_dash : Point, rectData: RectData) {
         max = max(d_dash.rawX, u_dash.rawX)
-        min =  min(d_dash.x, u_dash.x)
+        min =  min(d_dash.rawX, u_dash.rawX)
         leftViewWidth = abs(max - rectData.start_x)
         rightViewWidth = abs(rectData.end_x - min)
+        Log.d("xxx", "parent rect data verti $rectData")
         Log.d("xxx vertical", "v1width = $leftViewWidth ,  v2width = $rightViewWidth")
     }
 }

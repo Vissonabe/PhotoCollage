@@ -116,7 +116,17 @@ class StateManager(val tag: String, val context: Context) {
                 up
             )
         Log.d("xxx", "split direction $split")
+
+        if(split == Split.DIAGONAL){
+            return null
+        }
+
         findIntersectionInEdge(down, up)
+
+        if(firstIntersectEdge.index == -1 || secondIntersectEdge.index == -1) {
+            return null
+        }
+
         return when (split) {
             Split.HORIZONTAL -> {
                 horizontalSplitter.getPolygonSplit(

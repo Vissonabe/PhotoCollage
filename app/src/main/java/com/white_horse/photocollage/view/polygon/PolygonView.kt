@@ -6,11 +6,9 @@ import android.util.AttributeSet
 import android.view.ViewGroup
 import com.github.florent37.shapeofview.ShapeOfView
 import com.github.florent37.shapeofview.manager.ClipPathManager
+import com.white_horse.photocollage.models.*
 import com.white_horse.photocollage.utils.Action
-import com.white_horse.photocollage.models.Point
-import com.white_horse.photocollage.models.PolygonData
-import com.white_horse.photocollage.models.PolygonSplit
-import com.white_horse.photocollage.models.RectData
+import com.white_horse.photocollage.utils.concatenateInt
 import com.white_horse.photocollage.view.BorderView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -23,7 +21,8 @@ class PolygonView : ShapeOfView {
             tag?.toString() ?: "",
             this.context
         )
-    var action : Action<Pair<PolygonView, PolygonView>>? = null
+    var action : Action<ChildPolygonsData>? = null
+    var viewUniqueId : Int = -1
 
     private fun addBorderView(path: Path) {
         val borderview = BorderView(context)
@@ -33,8 +32,16 @@ class PolygonView : ShapeOfView {
         addView(borderview, lp1)
     }
 
-    fun setListener(viewAction : Action<Pair<PolygonView, PolygonView>>?) {
+    fun setListener(viewAction : Action<ChildPolygonsData>?) {
         this.action = viewAction
+    }
+
+    fun setUniqueId(uniqueId : Int) {
+        this.viewUniqueId = uniqueId
+    }
+
+    fun getUniqueId() : Int {
+        return viewUniqueId
     }
 
     fun splitView(down: Point, up: Point) {
@@ -48,7 +55,7 @@ class PolygonView : ShapeOfView {
 
                     val poly1 = addPolygonView1(polygonSplit.v1PolygonData)
                     val poly2 = addPolygonView2(polygonSplit.v2PolygonData)
-                    action?.run(Pair(poly1, poly2))
+                    action?.run(ChildPolygonsData(viewUniqueId, poly1, poly2))
                 }
             }
         }
@@ -57,6 +64,8 @@ class PolygonView : ShapeOfView {
     fun addPolygonView1(polygonData : PolygonData) : PolygonView {
         val polygon1 =
             PolygonView(context)
+        polygon1.setUniqueId(concatenateInt(viewUniqueId, viewUniqueId + 1))
+        polygon1.setListener(action)
         polygon1.tag = "polygon_1"
         polygon1.setVertexPoints(
             polygonData.pointList,
@@ -72,6 +81,8 @@ class PolygonView : ShapeOfView {
         val polygon2 =
             PolygonView(context)
         polygon2.tag = "polygon_2"
+        polygon2.setListener(action)
+        polygon2.setUniqueId(concatenateInt(viewUniqueId, viewUniqueId + 2))
         polygon2.setVertexPoints(
             polygonData.pointList,
             polygonData.width,
