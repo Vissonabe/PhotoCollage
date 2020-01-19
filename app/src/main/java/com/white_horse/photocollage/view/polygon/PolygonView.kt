@@ -1,15 +1,21 @@
 package com.white_horse.photocollage.view.polygon
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.graphics.Path
+import android.media.Image
 import android.util.AttributeSet
 import android.view.ViewGroup
+import android.widget.ImageView
+import com.bumptech.glide.Glide
 import com.github.florent37.shapeofview.ShapeOfView
 import com.github.florent37.shapeofview.manager.ClipPathManager
+import com.white_horse.photocollage.R
 import com.white_horse.photocollage.models.*
 import com.white_horse.photocollage.utils.Action
 import com.white_horse.photocollage.utils.concatenateInt
 import com.white_horse.photocollage.view.BorderView
+import com.white_horse.photocollage.view.TouchImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -30,6 +36,20 @@ class PolygonView : ShapeOfView {
             LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         borderview.setBorderPath(path, 5f)
         addView(borderview, lp1)
+    }
+
+    private fun addImageView() {
+        val image = TouchImageView(context)
+        image.scaleType = ImageView.ScaleType.CENTER_CROP
+        val lp1 = LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        image.layoutParams = lp1
+        image.setImageResource(R.drawable.unsplash)
+        addView(image, lp1)
+
+//        Glide.with(image)
+//            .load(BitmapFactory.decodeResource(resources, R.drawable.unsplash))
+//            .centerCrop()
+//            .into(image)
     }
 
     fun setListener(viewAction : Action<ChildPolygonsData>?) {
@@ -120,6 +140,7 @@ class PolygonView : ShapeOfView {
                         return false
                     }
                 })
+                addImageView()
                 addBorderView(path)
             }
         }

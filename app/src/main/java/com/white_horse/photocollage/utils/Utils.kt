@@ -2,7 +2,6 @@ package com.white_horse.photocollage.utils
 
 import android.content.Context
 import android.graphics.Path
-import android.util.Log
 import com.white_horse.photocollage.models.Edge
 import com.white_horse.photocollage.models.Point
 import com.white_horse.photocollage.models.Split
@@ -216,3 +215,5 @@ fun createEdgesFromPoints(points: List<Point>) : List<Edge>{
 fun concatenateInt(v1 : Int, v2 : Int) : Int {
     return "$v1$v2".toInt()
 }
+
+fun getLineLength(x1 : Float, y1 : Float, x2 : Float, y2 : Float): Float = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))

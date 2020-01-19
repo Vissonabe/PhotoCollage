@@ -2,6 +2,7 @@ package com.white_horse.photocollage
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import com.white_horse.photocollage.models.ChildPolygonsData
 import kotlinx.android.synthetic.main.activity_main.*
 import com.white_horse.photocollage.models.Point
@@ -22,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     var y = 0f
     val undoViewStack = Stack<Int>()
     lateinit var rootViewTree : ViewTree
+    var isOnEditMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +42,18 @@ class MainActivity : AppCompatActivity() {
         )
         test_polygon.setUniqueId(0)
         rootViewTree = ViewTree(test_polygon)
+
+        fab.setOnClickListener {
+            if(!isOnEditMode) {
+                isOnEditMode = true
+                it.setBackgroundResource(R.drawable.ic_close)
+                guideline_view.visibility = View.GONE
+            } else {
+                isOnEditMode = false
+                it.setBackgroundResource(R.drawable.ic_edit)
+                guideline_view.visibility = View.VISIBLE
+            }
+        }
     }
 
     val viewAction = object :

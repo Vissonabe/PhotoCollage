@@ -41,7 +41,7 @@ class BorderView : View {
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        canvas?.drawPath(borderPath, fillPaint)
+//        canvas?.drawPath(borderPath, fillPaint)
         canvas?.drawPath(borderPath, borderPaint)
     }
 }
