@@ -1,19 +1,16 @@
 package com.white_horse.photocollage.view.polygon
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.graphics.Path
-import android.media.Image
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageView
-import com.bumptech.glide.Glide
 import com.github.florent37.shapeofview.ShapeOfView
 import com.github.florent37.shapeofview.manager.ClipPathManager
 import com.white_horse.photocollage.R
 import com.white_horse.photocollage.models.*
 import com.white_horse.photocollage.utils.Action
-import com.white_horse.photocollage.utils.concatenateInt
+import com.white_horse.photocollage.utils.concatString
 import com.white_horse.photocollage.view.BorderView
 import com.white_horse.photocollage.view.TouchImageView
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +25,7 @@ class PolygonView : ShapeOfView {
             this.context
         )
     var action : Action<ChildPolygonsData>? = null
-    var viewUniqueId : Int = -1
+    var viewUniqueId : String = "-1"
 
     private fun addBorderView(path: Path) {
         val borderview = BorderView(context)
@@ -56,11 +53,11 @@ class PolygonView : ShapeOfView {
         this.action = viewAction
     }
 
-    fun setUniqueId(uniqueId : Int) {
+    fun setUniqueId(uniqueId : String) {
         this.viewUniqueId = uniqueId
     }
 
-    fun getUniqueId() : Int {
+    fun getUniqueId() : String {
         return viewUniqueId
     }
 
@@ -84,7 +81,7 @@ class PolygonView : ShapeOfView {
     fun addPolygonView1(polygonData : PolygonData) : PolygonView {
         val polygon1 =
             PolygonView(context)
-        polygon1.setUniqueId(concatenateInt(viewUniqueId, viewUniqueId + 1))
+        polygon1.setUniqueId(concatString(viewUniqueId,  "1"))
         polygon1.setListener(action)
         polygon1.tag = "polygon_1"
         polygon1.setVertexPoints(
@@ -102,7 +99,7 @@ class PolygonView : ShapeOfView {
             PolygonView(context)
         polygon2.tag = "polygon_2"
         polygon2.setListener(action)
-        polygon2.setUniqueId(concatenateInt(viewUniqueId, viewUniqueId + 2))
+        polygon2.setUniqueId(concatString(viewUniqueId,  "2"))
         polygon2.setVertexPoints(
             polygonData.pointList,
             polygonData.width,

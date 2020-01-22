@@ -212,8 +212,8 @@ fun createEdgesFromPoints(points: List<Point>) : List<Edge>{
     return edgeList
 }
 
-fun concatenateInt(v1 : Int, v2 : Int) : Int {
-    return "$v1$v2".toInt()
+fun concatString(v1 : String, v2 : String) : String {
+    return "$v1$v2"
 }
 
 fun getLineLength(x1 : Float, y1 : Float, x2 : Float, y2 : Float): Float = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))

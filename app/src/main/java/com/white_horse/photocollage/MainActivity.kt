@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
     val pointsList = mutableListOf<Point>()
     var x : Float = 0f
     var y = 0f
-    val undoViewStack = Stack<Int>()
+    val undoViewStack = Stack<String>()
     lateinit var rootViewTree : ViewTree
     var isOnEditMode = false
 
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         test_polygon.setVertexPoints(pointsList, x , y,
             RectData(0f, 1080f, 0f, 1920f)
         )
-        test_polygon.setUniqueId(0)
+        test_polygon.setUniqueId("0")
         rootViewTree = ViewTree(test_polygon)
 
         fab.setOnClickListener {

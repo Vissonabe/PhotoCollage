@@ -35,7 +35,7 @@ suspend fun addChildren(rootTree: ViewTree, childData: ChildPolygonsData) {
     }
 }
 
-suspend fun clearParentsChildren(parentId : Int, rootTree: ViewTree) {
+suspend fun clearParentsChildren(parentId : String, rootTree: ViewTree) {
     withContext(Dispatchers.Default) {
         val viewQueue = LinkedList<ViewTree>()
         viewQueue.add(rootTree)
