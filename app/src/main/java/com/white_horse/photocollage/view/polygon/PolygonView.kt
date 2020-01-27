@@ -3,16 +3,13 @@ package com.white_horse.photocollage.view.polygon
 import android.content.Context
 import android.graphics.Path
 import android.util.AttributeSet
-import android.view.ViewGroup
-import android.widget.ImageView
 import com.github.florent37.shapeofview.ShapeOfView
 import com.github.florent37.shapeofview.manager.ClipPathManager
-import com.white_horse.photocollage.R
-import com.white_horse.photocollage.models.*
+import com.white_horse.photocollage.models.ChildPolygonsData
+import com.white_horse.photocollage.models.Point
+import com.white_horse.photocollage.models.RectData
 import com.white_horse.photocollage.utils.Action
-import com.white_horse.photocollage.utils.concatString
-import com.white_horse.photocollage.view.BorderView
-import com.white_horse.photocollage.view.TouchImageView
+import com.white_horse.photocollage.utils.Polygon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -24,30 +21,9 @@ class PolygonView : ShapeOfView {
             tag?.toString() ?: "",
             this.context
         )
-    var action : Action<ChildPolygonsData>? = null
+    private var action : Action<ChildPolygonsData>? = null
     var viewUniqueId : String = "-1"
-
-    private fun addBorderView(path: Path) {
-        val borderview = BorderView(context)
-        val lp1 =
-            LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        borderview.setBorderPath(path, 5f)
-        addView(borderview, lp1)
-    }
-
-    private fun addImageView() {
-        val image = TouchImageView(context)
-        image.scaleType = ImageView.ScaleType.CENTER_CROP
-        val lp1 = LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        image.layoutParams = lp1
-        image.setImageResource(R.drawable.unsplash)
-        addView(image, lp1)
-
-//        Glide.with(image)
-//            .load(BitmapFactory.decodeResource(resources, R.drawable.unsplash))
-//            .centerCrop()
-//            .into(image)
-    }
+    private val childViewFactory = ChildViewManager(this)
 
     fun setListener(viewAction : Action<ChildPolygonsData>?) {
         this.action = viewAction
@@ -69,45 +45,13 @@ class PolygonView : ShapeOfView {
             if(polygonSplit != null) {
                 withContext(Dispatchers.Main) {
                     println("xxx split3 ${Thread.currentThread().name}, $tag")
-
-                    val poly1 = addPolygonView1(polygonSplit.v1PolygonData)
-                    val poly2 = addPolygonView2(polygonSplit.v2PolygonData)
+                    childViewFactory.hideTouchImageView()
+                    val poly1 = childViewFactory.addGetPolygonView1(polygonSplit.v1PolygonData, action)
+                    val poly2 = childViewFactory.addGetPolygonView2(polygonSplit.v2PolygonData, action)
                     action?.run(ChildPolygonsData(viewUniqueId, poly1, poly2))
                 }
             }
         }
-    }
-
-    fun addPolygonView1(polygonData : PolygonData) : PolygonView {
-        val polygon1 =
-            PolygonView(context)
-        polygon1.setUniqueId(concatString(viewUniqueId,  "1"))
-        polygon1.setListener(action)
-        polygon1.tag = "polygon_1"
-        polygon1.setVertexPoints(
-            polygonData.pointList,
-            polygonData.width,
-            polygonData.height,
-            polygonData.rect
-        )
-        this.addView(polygon1, polygonData.layoutParam)
-        return polygon1
-    }
-
-    fun addPolygonView2(polygonData : PolygonData): PolygonView {
-        val polygon2 =
-            PolygonView(context)
-        polygon2.tag = "polygon_2"
-        polygon2.setListener(action)
-        polygon2.setUniqueId(concatString(viewUniqueId,  "2"))
-        polygon2.setVertexPoints(
-            polygonData.pointList,
-            polygonData.width,
-            polygonData.height,
-            polygonData.rect
-        )
-        this.addView(polygon2, polygonData.layoutParam)
-        return polygon2
     }
 
     constructor(context: Context) : this(context, null)
@@ -123,6 +67,7 @@ class PolygonView : ShapeOfView {
     fun setVertexPoints(points: List<Point>, width: Float, height: Float, rectData: RectData) {
         println("xxx vertex1 ${Thread.currentThread().name}, $tag, $points")
         GlobalScope.launch {
+            val polygonView = Polygon(points)
             println("xxx vertex2 ${Thread.currentThread().name}, $tag")
             stateManager.setVertexPoints(points, width, height, rectData)
             val path = stateManager.getPathFromPoints()
@@ -134,11 +79,11 @@ class PolygonView : ShapeOfView {
                     }
 
                     override fun requiresBitmap(): Boolean {
-                        return false
+                        return true
                     }
                 })
-                addImageView()
-                addBorderView(path)
+                childViewFactory.addTouchImageView(path, polygonView)
+                childViewFactory.addBorderView(path)
             }
         }
     }

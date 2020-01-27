@@ -1,17 +1,16 @@
 package com.white_horse.photocollage.viewspliter
 
+import android.content.Context
 import android.util.Log
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import com.white_horse.photocollage.models.*
-import com.white_horse.photocollage.utils.createEdgesFromPoints
-import com.white_horse.photocollage.utils.findIntersection
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-class HorizontalSplitter(val tag : String): IViewSplitter {
+class HorizontalSplitter(val tag : String, val context: Context): IViewSplitter {
 
     var max = 0f
     var min = 0f
@@ -187,14 +186,14 @@ class HorizontalSplitter(val tag : String): IViewSplitter {
         Log.d("xxx temp", "xxx temp hori topEdge $tag -- $topEdge")
         val childEdges = createEdgesFromPoints(getTempPoints(edgeList, firstIntersectEdge, secondIntersectEdge))
 
-        childEdges.forEach {
-            Log.d("xxx temp", "xxx temp hori $tag -- $it")
-        }
+//        childEdges.forEach {
+//            Log.d("xxx temp", "xxx temp hori $tag -- $it")
+//        }
 
         childEdges.forEach {
             val intersection = findIntersection(topEdge.start, topEdge.end, it.start, it.end)
             if(intersection != null && intersection.x >= 0 && intersection.y >= 0) {
-                Log.d("xxx temp", "xxx temp interscetion $tag -- $intersection")
+//                Log.d("xxx temp", "xxx temp interscetion $tag -- $intersection")
                 isTopAligned = true
             }
         }
@@ -203,8 +202,8 @@ class HorizontalSplitter(val tag : String): IViewSplitter {
     }
 
     override suspend fun getPolygonSplit(p1: Point, p2: Point, rectData: RectData, edgeList: List<Edge>,
-                                 firstIntersectEdge: Edge,
-                                 secondIntersectEdge: Edge): PolygonSplit? {
+                                         firstIntersectEdge: Edge,
+                                         secondIntersectEdge: Edge): PolygonSplit? {
 
         calculateMinMax(p1, p2, rectData)
         val topRect = RectData(
@@ -233,21 +232,36 @@ class HorizontalSplitter(val tag : String): IViewSplitter {
             return null
         }
 
+        val v1RectData = getRectData(v1PointsList)
+        val v2RectData = getRectData(v2PointsList)
+
         val v1Height = if(isTopAligned) topViewHeight else bottomViewHeight
         val v2Height = if(isTopAligned) bottomViewHeight else topViewHeight
 
-        Log.d("xxx", "v1 hori intersection point: $v1PointsList -------- rect r1 data $topRect")
-        Log.d("xxx", "v2 hori intersection point: $v2PointsList -------- rect r2 data $topRect")
+        Log.d("xxx", "v1 hori intersection point: $v1PointsList -------- rect r1 data $v1Rect ----------- modified rect data $v1RectData")
+        Log.d("xxx", "v2 hori intersection point: $v2PointsList -------- rect r2 data $v2Rect ----------- modified rect data $v2RectData")
 
         val paramsPair = getLayoutParamsPair(topViewHeight.toInt(), bottomViewHeight.toInt())
         val v1Param = if(isTopAligned) paramsPair.first else paramsPair.second
         val v2Param = if(isTopAligned) paramsPair.second else paramsPair.first
 
+//        addMarginIfRequired(v1Param, v1RectData, parentRectData)
+//        addMarginIfRequired(v2Param, v2RectData, parentRectData)
+
         return PolygonSplit(
             Split.HORIZONTAL,
-            PolygonData(v1PointsList, viewWidth, v1Height, v1Rect, v1Param),
-            PolygonData(v2PointsList, viewWidth, v2Height, v2Rect, v2Param)
+            PolygonData(v1PointsList, viewWidth, v1Height, v1RectData, v1Param),
+            PolygonData(v2PointsList, viewWidth, v2Height, v2RectData, v2Param)
         )
+    }
+
+    fun addMarginIfRequired(lp : FrameLayout.LayoutParams, rectData: RectData, parentRectData: RectData) {
+        Log.d("xxx", "parent rect data: ${parentRectData}, childRectData ${rectData}")
+//        lp.topMargin = (parentRectData.start_y - rectData.start_y).toInt()
+//        lp.bottomMargin = (parentRectData.end_y - rectData.end_y).toInt()
+        lp.leftMargin = abs(parentRectData.start_x - rectData.start_x).toInt()
+        lp.rightMargin = abs(parentRectData.end_x - rectData.end_x).toInt()
+        Log.d("xxx", "margin: left ${lp.leftMargin}, right ${lp.rightMargin}")
     }
 
     private fun getLayoutParamsPair(topViewHeight : Int, bottomViewHeight : Int): Pair<FrameLayout.LayoutParams, FrameLayout.LayoutParams> {
@@ -276,6 +290,6 @@ class HorizontalSplitter(val tag : String): IViewSplitter {
         topViewHeight = abs(max - rectData.start_y)
         bottomViewHeight = abs(rectData.end_y - min)
         Log.d("xxx", "parent rect data hori $rectData")
-        Log.d("xxx vertical", "max = $max, min = $min, v1width = $viewHeight ,  v2width = $bottomViewHeight")
+        Log.d("xxx horizontal", "max = $max, min = $min, v1Height = $topViewHeight ,  v2Height = $bottomViewHeight")
     }
 }

@@ -6,9 +6,7 @@ import android.util.Log
 import android.widget.FrameLayout
 import com.white_horse.photocollage.models.*
 import com.white_horse.photocollage.utils.*
-import com.white_horse.photocollage.viewspliter.HorizontalSplitter
-import com.white_horse.photocollage.viewspliter.IViewSplitter
-import com.white_horse.photocollage.viewspliter.VerticalSplitter
+import com.white_horse.photocollage.viewspliter.*
 
 class StateManager(val tag: String, val context: Context) {
     private val edgeList = mutableListOf<Edge>()
@@ -25,8 +23,8 @@ class StateManager(val tag: String, val context: Context) {
     val horizontalSplitter: IViewSplitter
 
     init {
-        verticalSplitter = VerticalSplitter(tag)
-        horizontalSplitter = HorizontalSplitter(tag)
+        verticalSplitter = VerticalSplitter(tag, context)
+        horizontalSplitter = HorizontalSplitter(tag, context)
     }
 
     fun setVertexPoints(points: List<Point>, width: Float, height: Float, rectData: RectData) {

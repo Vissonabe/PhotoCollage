@@ -1,17 +1,17 @@
 package com.white_horse.photocollage.viewspliter
 
+import android.content.Context
 import android.util.Log
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import com.white_horse.photocollage.models.*
-import com.white_horse.photocollage.utils.createEdgesFromPoints
-import com.white_horse.photocollage.utils.findIntersection
+import com.white_horse.photocollage.utils.dpToPx
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-class VerticalSplitter(val tag : String) : IViewSplitter {
+class VerticalSplitter(val tag : String, val context: Context) : IViewSplitter {
     var max = 0f
     var min = 0f
     var leftViewWidth = 0f
@@ -190,14 +190,14 @@ class VerticalSplitter(val tag : String) : IViewSplitter {
         Log.d("xxx temp", "xxx temp verti leftEdge $tag -- $leftEdge")
         val childEdges = createEdgesFromPoints(getTempPoints(edgeList, firstIntersectEdge, secondIntersectEdge))
 
-        childEdges.forEach {
-            Log.d("xxx temp", "xxx temp verti $tag -- $it")
-        }
+//        childEdges.forEach {
+//            Log.d("xxx temp", "xxx temp verti $tag -- $it")
+//        }
 
         childEdges.forEach {
             val intersection = findIntersection(leftEdge.start, leftEdge.end, it.start, it.end)
             if(intersection != null && intersection.x >= 0 && intersection.y >= 0){
-                Log.d("xxx temp", "xxx temp interscetion $tag -- $intersection")
+//                Log.d("xxx temp", "xxx temp interscetion $tag -- $intersection")
                 isLeftAligned = true
             }
         }
@@ -205,29 +205,29 @@ class VerticalSplitter(val tag : String) : IViewSplitter {
         return isLeftAligned
     }
 
-    override suspend fun getPolygonSplit(p1 : Point, p2 : Point, rectData: RectData, edgeList: List<Edge>,
-                                 firstIntersectEdge: Edge,
-                                 secondIntersectEdge: Edge): PolygonSplit? {
+    override suspend fun getPolygonSplit(p1 : Point, p2 : Point, parentRectData: RectData, edgeList: List<Edge>,
+                                         firstIntersectEdge: Edge,
+                                         secondIntersectEdge: Edge): PolygonSplit? {
 
         if(edgeList.isEmpty()) {
              return null
         }
 
-        caculateMinMax(p1, p2, rectData)
+        caculateMinMax(p1, p2, parentRectData)
         val leftRect = RectData(
-            rectData.start_x,
+            parentRectData.start_x,
             max,
-            rectData.start_y,
-            rectData.end_y
+            parentRectData.start_y,
+            parentRectData.end_y
         )
         val rightRect = RectData(
             min,
-            rectData.end_x,
-            rectData.start_y,
-            rectData.end_y
+            parentRectData.end_x,
+            parentRectData.start_y,
+            parentRectData.end_y
         )
 
-        val isLeftAligned = isPolygonLeftAligned(rectData, edgeList, firstIntersectEdge, secondIntersectEdge)
+        val isLeftAligned = isPolygonLeftAligned(parentRectData, edgeList, firstIntersectEdge, secondIntersectEdge)
 
         Log.d("xxx", "getPolygonSplit vertical $tag -- $isLeftAligned")
 //        Log.d("xxx", "getPolygonSplit ${Thread.currentThread().name}")
@@ -241,21 +241,36 @@ class VerticalSplitter(val tag : String) : IViewSplitter {
             return null
         }
 
+        val v1RectData = getRectData(v1PointsList)
+        val v2RectData = getRectData(v2PointsList)
+
         val v1Width = if(isLeftAligned) leftViewWidth else rightViewWidth
         val v2Width = if(isLeftAligned) rightViewWidth else leftViewWidth
 
-        Log.d("xxx", "v1 vertical intersection point: $v1PointsList -------- rect data $leftRect")
-        Log.d("xxx", "v2 vertical intersection point: $v2PointsList -------- rect data $leftRect")
+        Log.d("xxx", "v1 vertical intersection point: $v1PointsList -------- rect data $v1Rect --------- modified rect data $v1RectData")
+        Log.d("xxx", "v2 vertical intersection point: $v2PointsList -------- rect data $v2Rect --------- modified rect data $v2RectData")
 
         val paramsPair = getLayoutParamsPair(leftViewWidth.toInt(), rightViewWidth.toInt())
         val v1Param = if(isLeftAligned) paramsPair.first else paramsPair.second
         val v2Param = if(isLeftAligned) paramsPair.second else paramsPair.first
 
+//        addMarginIfRequired(v1Param, v1RectData, parentRectData)
+//        addMarginIfRequired(v2Param, v2RectData, parentRectData)
+
         return PolygonSplit(
             Split.VERTICAL,
-            PolygonData(v1PointsList, v1Width, viewHeight, v1Rect, v1Param),
-            PolygonData(v2PointsList, v2Width, viewHeight, v2Rect, v2Param)
+            PolygonData(v1PointsList, v1Width, viewHeight, v1RectData, v1Param),
+            PolygonData(v2PointsList, v2Width, viewHeight, v2RectData, v2Param)
         )
+    }
+
+    fun addMarginIfRequired(lp : FrameLayout.LayoutParams, rectData: RectData, parentRectData: RectData) {
+        Log.d("xxx", "parent rect data: ${parentRectData}, childRectData ${rectData}")
+        lp.topMargin = abs(parentRectData.start_y - rectData.start_y).toInt()
+        lp.bottomMargin = abs(parentRectData.end_y - rectData.end_y).toInt()
+        Log.d("xxx", "margin: top ${lp.topMargin}, bottom ${lp.bottomMargin}")
+//        lp.leftMargin = (parentRectData.start_x - rectData.start_x).toInt()
+//        lp.rightMargin = (parentRectData.end_x - rectData.end_x).toInt()
     }
 
     fun getLayoutParamsPair(leftViewWidth : Int, rightViewWidth : Int): Pair<FrameLayout.LayoutParams, FrameLayout.LayoutParams> {

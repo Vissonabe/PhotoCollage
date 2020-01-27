@@ -1,16 +1,16 @@
 package com.white_horse.photocollage
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import com.white_horse.photocollage.models.ChildPolygonsData
-import kotlinx.android.synthetic.main.activity_main.*
 import com.white_horse.photocollage.models.Point
 import com.white_horse.photocollage.models.RectData
 import com.white_horse.photocollage.models.ViewTree
 import com.white_horse.photocollage.utils.Action
 import com.white_horse.photocollage.utils.addChildren
 import com.white_horse.photocollage.utils.getActivePolygonsList
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         pointsList.add(Point(x, 0f, x, 0f))
 
         test_polygon.setVertexPoints(pointsList, x , y,
-            RectData(0f, 1080f, 0f, 1920f)
+            RectData(0f, x, 0f, y)
         )
         test_polygon.setUniqueId("0")
         rootViewTree = ViewTree(test_polygon)
