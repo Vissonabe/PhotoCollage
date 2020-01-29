@@ -1,16 +1,14 @@
 package com.white_horse.photocollage
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import com.white_horse.photocollage.models.ChildPolygonsData
-import kotlinx.android.synthetic.main.activity_main.*
 import com.white_horse.photocollage.models.Point
 import com.white_horse.photocollage.models.RectData
 import com.white_horse.photocollage.models.ViewTree
-import com.white_horse.photocollage.utils.Action
-import com.white_horse.photocollage.utils.addChildren
-import com.white_horse.photocollage.utils.getActivePolygonsList
+import com.white_horse.photocollage.utils.*
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
@@ -18,9 +16,6 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    val pointsList = mutableListOf<Point>()
-    var x : Float = 0f
-    var y = 0f
     val undoViewStack = Stack<String>()
     lateinit var rootViewTree : ViewTree
     var isOnEditMode = false
@@ -28,21 +23,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        x = resources.displayMetrics.widthPixels.toFloat()
-        y = resources.displayMetrics.heightPixels.toFloat()
-
-        println("xxx -- $x --- $y")
-        pointsList.add(Point(0f, 0f, 0f, 0f))
-        pointsList.add(Point(0f, y, 0f, y))
-        pointsList.add(Point(x, y, x, y))
-        pointsList.add(Point(x, 0f, x, 0f))
-
-        test_polygon.setVertexPoints(pointsList, x , y,
-            RectData(0f, 1080f, 0f, 1920f)
-        )
-        test_polygon.setUniqueId("0")
-        rootViewTree = ViewTree(test_polygon)
-
+        initRootPolygon()
         fab.setOnClickListener {
             if(!isOnEditMode) {
                 isOnEditMode = true
@@ -54,6 +35,17 @@ class MainActivity : AppCompatActivity() {
                 guideline_view.visibility = View.VISIBLE
             }
         }
+    }
+
+    private fun initRootPolygon() {
+        val x = resources.displayMetrics.widthPixels.toFloat()
+        val y = resources.displayMetrics.heightPixels.toFloat()
+        val points = getPointsList(0f ,0f ,x, y)
+        test_polygon.setVertexPoints(points, x , y,
+            RectData(0f, x, 0f, y)
+        )
+        test_polygon.setUniqueId("0")
+        rootViewTree = ViewTree(test_polygon)
     }
 
     val viewAction = object :

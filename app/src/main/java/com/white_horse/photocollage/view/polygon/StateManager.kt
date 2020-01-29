@@ -6,9 +6,7 @@ import android.util.Log
 import android.widget.FrameLayout
 import com.white_horse.photocollage.models.*
 import com.white_horse.photocollage.utils.*
-import com.white_horse.photocollage.viewspliter.HorizontalSplitter
-import com.white_horse.photocollage.viewspliter.IViewSplitter
-import com.white_horse.photocollage.viewspliter.VerticalSplitter
+import com.white_horse.photocollage.viewspliter.*
 
 class StateManager(val tag: String, val context: Context) {
     private val edgeList = mutableListOf<Edge>()
@@ -21,12 +19,13 @@ class StateManager(val tag: String, val context: Context) {
     var u_dash = Point.getDefaultPoint()
     var firstIntersectEdge = Edge.getDefaultEdge()
     var secondIntersectEdge = Edge.getDefaultEdge()
-    val verticalSplitter: IViewSplitter
-    val horizontalSplitter: IViewSplitter
+    private val verticalSplitter: ViewSplitter
+    private val horizontalSplitter: ViewSplitter
+    val diagonalSplitter = DiagonalSplitter(tag, context)
 
     init {
-        verticalSplitter = VerticalSplitter(tag)
-        horizontalSplitter = HorizontalSplitter(tag)
+        verticalSplitter = VerticalSplitter(tag, context)
+        horizontalSplitter = HorizontalSplitter(tag, context)
     }
 
     fun setVertexPoints(points: List<Point>, width: Float, height: Float, rectData: RectData) {
@@ -34,8 +33,6 @@ class StateManager(val tag: String, val context: Context) {
         pointsList.clearAndAdd(points)
         viewHeight = height
         viewWidth = width
-        verticalSplitter.updateViewWidthHeight(viewWidth, viewHeight)
-        horizontalSplitter.updateViewWidthHeight(viewWidth, viewHeight)
         createEdgesFromPoints(points)
     }
 
@@ -109,21 +106,13 @@ class StateManager(val tag: String, val context: Context) {
     }
 
     suspend fun splitView(down: Point, up: Point): PolygonSplit? {
-        val split =
-            getSplitDirection(
-                context,
-                down,
-                up
-            )
-        Log.d("xxx", "split direction $split")
+        val split = getSplitDirection(context, down, up)
 
-        if(split == Split.DIAGONAL){
-            return null
-        }
+        LogTrace.d("split direction $split")
 
         findIntersectionInEdge(down, up)
 
-        if(firstIntersectEdge.index == -1 || secondIntersectEdge.index == -1) {
+        if(firstIntersectEdge.index == -1 || secondIntersectEdge.index == -1 || edgeList.isEmpty()) {
             return null
         }
 
@@ -148,7 +137,17 @@ class StateManager(val tag: String, val context: Context) {
                     secondIntersectEdge
                 )
             }
-            Split.DIAGONAL -> null
+            Split.DIAGONAL -> {
+                diagonalSplitter.getPolygonSplit(
+                    d_dash,
+                    u_dash,
+                    rectData,
+                    edgeList.toList(),
+                    firstIntersectEdge,
+                    secondIntersectEdge
+                )
+            }
+            Split.UNKNOWN -> null
         }
     }
 }

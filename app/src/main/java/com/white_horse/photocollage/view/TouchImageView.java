@@ -6,6 +6,8 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
@@ -24,6 +26,12 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.OverScroller;
 import android.widget.Scroller;
 import androidx.appcompat.widget.AppCompatImageView;
+
+import com.white_horse.photocollage.models.Point;
+import com.white_horse.photocollage.utils.Polygon;
+import com.white_horse.photocollage.view.polygon.PolygonView;
+
+import java.util.List;
 
 /**
  * Created by MyInnos on 28-11-2016.
@@ -90,6 +98,16 @@ public class TouchImageView extends AppCompatImageView {
     private GestureDetector.OnDoubleTapListener doubleTapListener = null;
     private OnTouchListener userTouchListener = null;
     private OnTouchImageViewListener touchImageViewListener = null;
+    private Path viewPath = null;
+    private Paint viewPaint = new Paint();
+    private Polygon polygon;
+
+    public TouchImageView(Context context, Path path, Polygon polygon) {
+        super(context);
+        viewPath = path;
+        this.polygon = polygon;
+        sharedConstructing(context);
+    }
 
     public TouchImageView(Context context) {
         super(context);
@@ -127,6 +145,16 @@ public class TouchImageView extends AppCompatImageView {
         setState(State.NONE);
         onDrawReady = false;
         super.setOnTouchListener(new PrivateOnTouchListener());
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        return super.dispatchTouchEvent(event);
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 
     @Override
@@ -278,6 +306,7 @@ public class TouchImageView extends AppCompatImageView {
             setZoom(delayedZoomVariables.scale, delayedZoomVariables.focusX, delayedZoomVariables.focusY, delayedZoomVariables.scaleType);
             delayedZoomVariables = null;
         }
+        canvas.clipPath(viewPath);
         super.onDraw(canvas);
     }
 
@@ -826,6 +855,11 @@ public class TouchImageView extends AppCompatImageView {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
+//            if(!polygon.contains(event.getRawX(), event.getRawY())){
+//                Log.d("xxx", ((PolygonView)v.getParent()).getTag() + "image touch" + event.getRawX() + " rawY " + event.getRawY());
+//                return false;
+//            }
+            Log.d("xxx", ((PolygonView)v.getParent()).getTag() + " image touch " + event.getAction());
             mScaleDetector.onTouchEvent(event);
             mGestureDetector.onTouchEvent(event);
             PointF curr = new PointF(event.getX(), event.getY());
