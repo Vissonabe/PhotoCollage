@@ -47,4 +47,13 @@ fun concatString(v1 : String, v2 : String) : String {
     return "$v1$v2"
 }
 
+fun getPointsList(startX : Float, startY : Float, width: Float, height: Float) : List<Point> {
+    val pointsList = ArrayList<Point>()
+    pointsList.add(Point.newPoint(startX, startY))
+    pointsList.add(Point.newPoint(startX, height))
+    pointsList.add(Point.newPoint(width, height))
+    pointsList.add(Point.newPoint(width, startY))
+    return pointsList
+}
+
 fun getLineLength(x1 : Float, y1 : Float, x2 : Float, y2 : Float): Float = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))

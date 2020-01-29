@@ -9,6 +9,7 @@ import com.white_horse.photocollage.models.ChildPolygonsData
 import com.white_horse.photocollage.models.Point
 import com.white_horse.photocollage.models.RectData
 import com.white_horse.photocollage.utils.Action
+import com.white_horse.photocollage.utils.LogTrace
 import com.white_horse.photocollage.utils.Polygon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -38,17 +39,15 @@ class PolygonView : ShapeOfView {
     }
 
     fun splitView(down: Point, up: Point) {
-        println("xxx split1 ${Thread.currentThread().name}, $tag")
         GlobalScope.launch {
-            println("xxx split2 ${Thread.currentThread().name}, $tag")
             val polygonSplit = stateManager.splitView(down, up)
             if(polygonSplit != null) {
                 withContext(Dispatchers.Main) {
-                    println("xxx split3 ${Thread.currentThread().name}, $tag")
                     childViewFactory.hideTouchImageView()
                     val poly1 = childViewFactory.addGetPolygonView1(polygonSplit.v1PolygonData, action)
                     val poly2 = childViewFactory.addGetPolygonView2(polygonSplit.v2PolygonData, action)
                     action?.run(ChildPolygonsData(viewUniqueId, poly1, poly2))
+                    LogTrace.e("view split done")
                 }
             }
         }
@@ -65,13 +64,10 @@ class PolygonView : ShapeOfView {
     )
 
     fun setVertexPoints(points: List<Point>, width: Float, height: Float, rectData: RectData) {
-        println("xxx vertex1 ${Thread.currentThread().name}, $tag, $points")
         GlobalScope.launch {
             val polygonView = Polygon(points)
-            println("xxx vertex2 ${Thread.currentThread().name}, $tag")
             stateManager.setVertexPoints(points, width, height, rectData)
             val path = stateManager.getPathFromPoints()
-            println("xxx vertex3 ${Thread.currentThread().name}, $tag")
             withContext(Dispatchers.Main) {
                 super.setClipPathCreator(object : ClipPathManager.ClipPathCreator {
                     override fun createClipPath(width: Int, height: Int): Path {
@@ -82,6 +78,7 @@ class PolygonView : ShapeOfView {
                         return true
                     }
                 })
+                LogTrace.d("rootpolygon area ${polygonView.area()}")
                 childViewFactory.addTouchImageView(path, polygonView)
                 childViewFactory.addBorderView(path)
             }

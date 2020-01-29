@@ -30,10 +30,13 @@ public class Polygon {
         polyY = new float[polySides];
         polyX = new float[polySides];
 
-        for(int i = 0; i < polySides; i++){
-            polyY[i] = points.get(i).getRawX();
-            polyX[i] = points.get(i).getRawY();
+        for(int i = 0; i < polySides; i++) {
+            polyX[i] = points.get(i).getRawX();
+            polyY[i] = points.get(i).getRawY();
         }
+
+        LogTrace.Companion.d(polyX);
+        LogTrace.Companion.d(polyY);
     }
 
     /**
@@ -55,5 +58,21 @@ public class Polygon {
         return oddTransitions;
     }
 
+    public double area() {
+        // Initialze area
+        double area = 0.0;
 
+        int n = polySides;
+        // Calculate value of shoelace formula
+        int j = n - 1;
+        for (int i = 0; i < n; i++)
+        {
+            area += (polyX[j] + polyX[i]) * (polyY[j] - polyY[i]);
+            // j is previous vertex to i
+            j = i;
+        }
+
+        // Return absolute value
+        return Math.abs(area / 2.0);
+    }
 }

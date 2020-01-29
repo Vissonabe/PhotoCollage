@@ -6,11 +6,11 @@ data class RectData(val start_x : Float, val end_x : Float, val start_y : Float,
             RectData(0f, 0f, 0f, 0f)
 
         fun getTopEdge(rectData: RectData) : Edge {
-            return Edge(0, Point(rectData.start_x, rectData.start_y), Point(rectData.end_x, rectData.start_y))
+            return Edge(0, Point.newPoint(rectData.start_x, rectData.start_y), Point.newPoint(rectData.end_x, rectData.start_y))
         }
 
         fun getLeftEdge(rectData: RectData) : Edge {
-            return Edge(0, Point(rectData.start_x, rectData.start_y), Point(rectData.start_x, rectData.end_y))
+            return Edge(0, Point.newPoint(rectData.start_x, rectData.start_y), Point.newPoint(rectData.start_x, rectData.end_y))
         }
     }
 }

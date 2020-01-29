@@ -2,14 +2,16 @@ package com.white_horse.photocollage.view.polygon
 
 import android.content.Context
 import android.graphics.Path
+import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.core.view.children
 import com.white_horse.photocollage.R
 import com.white_horse.photocollage.models.ChildPolygonsData
-import com.white_horse.photocollage.models.Point
 import com.white_horse.photocollage.models.PolygonData
 import com.white_horse.photocollage.utils.Action
+import com.white_horse.photocollage.utils.LogTrace
 import com.white_horse.photocollage.utils.Polygon
 import com.white_horse.photocollage.utils.concatString
 import com.white_horse.photocollage.view.BorderView
@@ -18,7 +20,8 @@ import com.white_horse.photocollage.view.TouchImageView
 class ChildViewManager(val view : PolygonView) {
 
     val context : Context = view.context
-    private val viewUniqueId = view.viewUniqueId
+    val VIEW_ONE_ID = "1"
+    val VIEW_TWO_ID = "2"
 
     fun addBorderView(path: Path) {
         val borderView = BorderView(context)
@@ -46,12 +49,22 @@ class ChildViewManager(val view : PolygonView) {
 
     fun hideTouchImageView() {
         //change this logic
-        view.removeViewAt(1)
+        var imageViewIndex = -1
+        view.children.forEachIndexed { index, view ->
+            if(view is TouchImageView) {
+                imageViewIndex = index
+            }
+        }
+        if(imageViewIndex > -1) {
+            //todo fix this -->
+            view.getChildAt(imageViewIndex).visibility = View.GONE
+        }
     }
 
     fun addGetPolygonView1(polygonData : PolygonData, viewAction : Action<ChildPolygonsData>?) : PolygonView {
         val polygon1 = PolygonView(context)
-        val uniqueId = concatString(viewUniqueId,  "1")
+        val uniqueId = concatString(view.getUniqueId(),  VIEW_ONE_ID)
+        LogTrace.d("polygon1 $uniqueId")
         polygon1.setUniqueId(uniqueId)
         polygon1.setListener(viewAction)
         polygon1.tag = "polygon_$uniqueId"
@@ -67,7 +80,8 @@ class ChildViewManager(val view : PolygonView) {
 
     fun addGetPolygonView2(polygonData : PolygonData, viewAction : Action<ChildPolygonsData>?): PolygonView {
         val polygon2 = PolygonView(context)
-        val uniqueId = concatString(viewUniqueId,  "2")
+        val uniqueId = concatString(view.getUniqueId(),  VIEW_TWO_ID)
+        LogTrace.d("polygon2 $uniqueId")
         polygon2.tag = "polygon_$uniqueId"
         polygon2.setListener(viewAction)
         polygon2.setUniqueId(uniqueId)

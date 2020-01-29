@@ -5,6 +5,7 @@ import com.white_horse.photocollage.models.Edge
 import com.white_horse.photocollage.models.Point
 import com.white_horse.photocollage.models.RectData
 import com.white_horse.photocollage.models.Split
+import com.white_horse.photocollage.utils.LogTrace
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
@@ -109,14 +110,18 @@ suspend fun splitDirection(context: Context, lineStart : Point, lineEnd : Point)
         lineStart,
         lineEnd
     )
-//    Log.d("xxx", "left - $leftIntersection, top - $topIntersection, right - $rightIntersection, bottom - $bottomIntersection")
+
+    LogTrace.d("left - $leftIntersection, top - $topIntersection, right - $rightIntersection, bottom - $bottomIntersection")
 
     return if(leftIntersection != null && rightIntersection != null){
         Split.HORIZONTAL
     } else if(topIntersection != null && bottomIntersection != null) {
         Split.VERTICAL
-    } else {
+    } else if((topIntersection != null && (leftIntersection != null || rightIntersection != null)) ||
+        (bottomIntersection != null && (leftIntersection != null || rightIntersection != null))) {
         Split.DIAGONAL
+    } else {
+        Split.UNKNOWN
     }
 }
 
