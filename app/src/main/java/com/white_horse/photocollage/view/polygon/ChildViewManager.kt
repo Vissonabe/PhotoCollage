@@ -35,20 +35,20 @@ class ChildViewManager(val view : PolygonView) {
     }
 
     fun addTouchImageView(path: Path, polygon: Polygon) {
-        val image = TouchImageView(context, path, polygon)
-        image.adjustViewBounds = true
-        image.clipToOutline = true
+        val image = TouchImageView(context)
+        image.setPathAndPolygon(path, polygon)
         image.scaleType = ImageView.ScaleType.CENTER_CROP
         val lp1 = FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
+        image.layoutParams = lp1
         image.setImageResource(R.drawable.adventure)
+//      Glide.with(context).load(R.drawable.adventure).centerCrop().into(image)
         view.addView(image, lp1)
     }
 
     fun hideTouchImageView() {
-        //change this logic
         var imageViewIndex = -1
         view.children.forEachIndexed { index, view ->
             if(view is TouchImageView) {
@@ -64,7 +64,6 @@ class ChildViewManager(val view : PolygonView) {
     fun addGetPolygonView1(polygonData : PolygonData, viewAction : Action<ChildPolygonsData>?) : PolygonView {
         val polygon1 = PolygonView(context)
         val uniqueId = concatString(view.getUniqueId(),  VIEW_ONE_ID)
-        LogTrace.d("polygon1 $uniqueId")
         polygon1.setUniqueId(uniqueId)
         polygon1.setListener(viewAction)
         polygon1.tag = "polygon_$uniqueId"
@@ -74,14 +73,13 @@ class ChildViewManager(val view : PolygonView) {
             polygonData.height,
             polygonData.rect
         )
-        view.addView(polygon1, polygonData.layoutParam)
+        view.addView(polygon1,0, polygonData.layoutParam)
         return polygon1
     }
 
     fun addGetPolygonView2(polygonData : PolygonData, viewAction : Action<ChildPolygonsData>?): PolygonView {
         val polygon2 = PolygonView(context)
         val uniqueId = concatString(view.getUniqueId(),  VIEW_TWO_ID)
-        LogTrace.d("polygon2 $uniqueId")
         polygon2.tag = "polygon_$uniqueId"
         polygon2.setListener(viewAction)
         polygon2.setUniqueId(uniqueId)
@@ -91,7 +89,7 @@ class ChildViewManager(val view : PolygonView) {
             polygonData.height,
             polygonData.rect
         )
-        view.addView(polygon2, polygonData.layoutParam)
+        view.addView(polygon2, 1, polygonData.layoutParam)
         return polygon2
     }
 }

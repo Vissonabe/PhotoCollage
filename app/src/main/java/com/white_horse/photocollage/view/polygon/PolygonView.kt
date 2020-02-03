@@ -3,6 +3,7 @@ package com.white_horse.photocollage.view.polygon
 import android.content.Context
 import android.graphics.Path
 import android.util.AttributeSet
+import androidx.core.view.children
 import com.github.florent37.shapeofview.ShapeOfView
 import com.github.florent37.shapeofview.manager.ClipPathManager
 import com.white_horse.photocollage.models.ChildPolygonsData
@@ -17,11 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class PolygonView : ShapeOfView {
-    private val stateManager =
-        StateManager(
-            tag?.toString() ?: "",
-            this.context
-        )
+    private val stateManager = StateManager(this.context)
     private var action : Action<ChildPolygonsData>? = null
     var viewUniqueId : String = "-1"
     private val childViewFactory = ChildViewManager(this)
@@ -66,6 +63,7 @@ class PolygonView : ShapeOfView {
     fun setVertexPoints(points: List<Point>, width: Float, height: Float, rectData: RectData) {
         GlobalScope.launch {
             val polygonView = Polygon(points)
+            stateManager.viewTag = viewUniqueId
             stateManager.setVertexPoints(points, width, height, rectData)
             val path = stateManager.getPathFromPoints()
             withContext(Dispatchers.Main) {
@@ -79,9 +77,18 @@ class PolygonView : ShapeOfView {
                     }
                 })
                 LogTrace.d("rootpolygon area ${polygonView.area()}")
-                childViewFactory.addTouchImageView(path, polygonView)
+//                childViewFactory.addTouchImageView(path, polygonView)
                 childViewFactory.addBorderView(path)
             }
+        }
+    }
+
+    fun clearPolygonChildrens() {
+        val index = children.indexOfFirst {
+            it is PolygonView
+        }
+        if(index >= 0) {
+            removeViews(index, 2)
         }
     }
 }

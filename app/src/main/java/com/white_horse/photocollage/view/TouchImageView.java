@@ -102,13 +102,6 @@ public class TouchImageView extends AppCompatImageView {
     private Paint viewPaint = new Paint();
     private Polygon polygon;
 
-    public TouchImageView(Context context, Path path, Polygon polygon) {
-        super(context);
-        viewPath = path;
-        this.polygon = polygon;
-        sharedConstructing(context);
-    }
-
     public TouchImageView(Context context) {
         super(context);
         sharedConstructing(context);
@@ -145,6 +138,12 @@ public class TouchImageView extends AppCompatImageView {
         setState(State.NONE);
         onDrawReady = false;
         super.setOnTouchListener(new PrivateOnTouchListener());
+    }
+
+    public void setPathAndPolygon(Path path, Polygon polygon) {
+        viewPath = path;
+        this.polygon = polygon;
+        invalidate();
     }
 
     @Override
@@ -306,7 +305,9 @@ public class TouchImageView extends AppCompatImageView {
             setZoom(delayedZoomVariables.scale, delayedZoomVariables.focusX, delayedZoomVariables.focusY, delayedZoomVariables.scaleType);
             delayedZoomVariables = null;
         }
-        canvas.clipPath(viewPath);
+        if(viewPath != null) {
+            canvas.clipPath(viewPath);
+        }
         super.onDraw(canvas);
     }
 
@@ -859,7 +860,6 @@ public class TouchImageView extends AppCompatImageView {
 //                Log.d("xxx", ((PolygonView)v.getParent()).getTag() + "image touch" + event.getRawX() + " rawY " + event.getRawY());
 //                return false;
 //            }
-            Log.d("xxx", ((PolygonView)v.getParent()).getTag() + " image touch " + event.getAction());
             mScaleDetector.onTouchEvent(event);
             mGestureDetector.onTouchEvent(event);
             PointF curr = new PointF(event.getX(), event.getY());
