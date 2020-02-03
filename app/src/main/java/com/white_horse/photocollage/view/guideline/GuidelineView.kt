@@ -1,4 +1,4 @@
-package com.white_horse.photocollage.view
+package com.white_horse.photocollage.view.guideline
 
 import android.content.Context
 import android.graphics.Canvas
@@ -13,8 +13,6 @@ import com.white_horse.photocollage.models.Point
 import com.white_horse.photocollage.utils.getLineLength
 
 class GuidelineView : View {
-    val DEBUG_TAG = "xxx"
-    val THRESHOLD_LENGTH = 300f
 
     var actionMasked: Int = -10
     var action: Action<Pair<Point, Point>>? = null
@@ -29,23 +27,28 @@ class GuidelineView : View {
         defStyleAttr
     )
 
-    val guideLinePaint = Paint()
-    val vertualLinePaint = Paint()
+    private val guideLinePaint = Paint()
+    private val vertualLinePaint = Paint()
 
     var downX: Float = 0f
     var downY: Float = 0f
     var upX: Float = 0f
     var upY: Float = 0f
-
-    var vertualEndPoint = Point.getDefaultPoint()
-    var vertualStartPoint = Point.getDefaultPoint()
-    var lineLength = 0f
+    private val viewManager = GuideLineViewManager(this::onCalculatedVirtualPoints)
+    private var virtualStartPoint = Point.getDefaultPoint()
+    private var virtualEndPoint = Point.getDefaultPoint()
 
     init {
         guideLinePaint.strokeWidth = 6f
         guideLinePaint.color = resources.getColor(R.color.colorAccent)
         vertualLinePaint.strokeWidth = 3f
         vertualLinePaint.color = resources.getColor(R.color.black)
+    }
+
+    fun onCalculatedVirtualPoints(pair : Pair<Point, Point>) {
+        virtualStartPoint = pair.first
+        virtualEndPoint = pair.second
+        action?.run(pair)
     }
 
     fun setListener(action: Action<Pair<Point, Point>>?) {
@@ -59,70 +62,44 @@ class GuidelineView : View {
             MotionEvent.ACTION_DOWN -> {
                 downX = event.x
                 downY = event.y
-//                Log.d(DEBUG_TAG, "Action was DOWN --- ${event.x} , ${event.y}")
                 true
             }
-            MotionEvent.ACTION_MOVE -> {
-                upX = event.x
+            MotionEvent.ACTION_MOVE -> { upX = event.x
                 upY = event.y
                 invalidate()
-//                Log.d(DEBUG_TAG, "Action was MOVE --- ${event.x} , ${event.y}")
                 true
             }
             MotionEvent.ACTION_UP -> {
                 upX = event.x
                 upY = event.y
-//                Log.d(DEBUG_TAG, "Action was UP --- ${event.x} , ${event.y}")
-                calculateLineLength()
+                viewManager.calculateLineLength(downX, downY, upX, upY)
                 invalidate()
                 true
             }
             MotionEvent.ACTION_CANCEL -> {
-                true
+                false
             }
             MotionEvent.ACTION_OUTSIDE -> {
-                true
+                false
             }
             else -> super.onTouchEvent(event)
         }
-    }
-
-    private fun calculateLineLength() {
-        lineLength = getLineLength(downX, downY, upX, upY)
-        Log.d("xxx", "length of line $lineLength")
-        if (isLineGreaterThanThreshold()) {
-            findVirtualEndPoint(4)
-        }
-    }
-
-    private fun findVirtualEndPoint(multiplyFactor: Int = 1) {
-        val endX = (upX + ((upX - downX) * multiplyFactor))
-        val endY = (upY - ((downY - upY) * multiplyFactor))
-        vertualEndPoint = Point.newPoint(endX, endY)
-
-        val startX = (downX - ((upX - downX) * multiplyFactor))
-        val startY = (downY + ((downY - upY) * multiplyFactor))
-
-        vertualStartPoint = Point.newPoint(startX, startY)
-        action?.run(Pair(vertualStartPoint, vertualEndPoint))
-    }
-
-    fun isLineGreaterThanThreshold(): Boolean {
-        return lineLength > THRESHOLD_LENGTH
     }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         if (actionMasked == MotionEvent.ACTION_MOVE) {
             canvas?.drawLine(downX, downY, upX, upY, guideLinePaint)
-        } else if (actionMasked == MotionEvent.ACTION_UP && isLineGreaterThanThreshold()) {
-            canvas?.drawLine(
-                vertualStartPoint.x,
-                vertualStartPoint.y,
-                vertualEndPoint.x,
-                vertualEndPoint.y,
-                vertualLinePaint
-            )
         }
+//        else if (actionMasked == MotionEvent.ACTION_UP &&
+//            viewManager.isLineGreaterThanThreshold(downX, downY, upX, upY)) {
+//            canvas?.drawLine(
+//                virtualStartPoint.x,
+//                virtualStartPoint.y,
+//                virtualEndPoint.x,
+//                virtualEndPoint.y,
+//                vertualLinePaint
+//            )
+//        }
     }
 }

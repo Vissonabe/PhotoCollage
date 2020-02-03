@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AnimFloatingActionButton">
+        <attr name="avdFirst" format="reference" />
+        <attr name="avdSecond" format="reference" />
+    </declare-styleable>
+</resources>
