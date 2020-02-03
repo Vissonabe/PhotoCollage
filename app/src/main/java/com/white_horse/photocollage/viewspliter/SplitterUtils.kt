@@ -111,7 +111,7 @@ suspend fun splitDirection(context: Context, lineStart : Point, lineEnd : Point)
         lineEnd
     )
 
-    LogTrace.d("left - $leftIntersection, top - $topIntersection, right - $rightIntersection, bottom - $bottomIntersection")
+//    LogTrace.d("left - $leftIntersection, top - $topIntersection, right - $rightIntersection, bottom - $bottomIntersection")
 
     return if(leftIntersection != null && rightIntersection != null){
         Split.HORIZONTAL

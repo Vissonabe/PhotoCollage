@@ -8,9 +8,10 @@ import com.white_horse.photocollage.models.*
 import com.white_horse.photocollage.utils.*
 import com.white_horse.photocollage.viewspliter.*
 
-class StateManager(val tag: String, val context: Context) {
+class StateManager(val context: Context) {
     private val edgeList = mutableListOf<Edge>()
     var rectData: RectData = RectData.getDefaultRect()
+    var viewTag: String = ""
 
     private val pointsList = mutableListOf<Point>()
     var viewWidth: Float = 0f
@@ -21,11 +22,15 @@ class StateManager(val tag: String, val context: Context) {
     var secondIntersectEdge = Edge.getDefaultEdge()
     private val verticalSplitter: ViewSplitter
     private val horizontalSplitter: ViewSplitter
-    val diagonalSplitter = DiagonalSplitter(tag, context)
+    val diagonalSplitter = DiagonalSplitter(this::getViewTagAction, context)
 
     init {
-        verticalSplitter = VerticalSplitter(tag, context)
-        horizontalSplitter = HorizontalSplitter(tag, context)
+        verticalSplitter = VerticalSplitter(this::getViewTagAction, context)
+        horizontalSplitter = HorizontalSplitter(this::getViewTagAction, context)
+    }
+
+    fun getViewTagAction(): String {
+        return viewTag
     }
 
     fun setVertexPoints(points: List<Point>, width: Float, height: Float, rectData: RectData) {

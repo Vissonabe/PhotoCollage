@@ -1,38 +1,55 @@
-package com.white_horse.photocollage
+package com.white_horse.photocollage.activity
 
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import com.white_horse.photocollage.R
 import com.white_horse.photocollage.models.ChildPolygonsData
 import com.white_horse.photocollage.models.Point
 import com.white_horse.photocollage.models.RectData
 import com.white_horse.photocollage.models.ViewTree
-import com.white_horse.photocollage.utils.*
+import com.white_horse.photocollage.utils.Action
+import com.white_horse.photocollage.utils.getPointsList
+import com.white_horse.photocollage.view.AnimFloatingActionButton
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
 
-    val undoViewStack = Stack<String>()
-    lateinit var rootViewTree : ViewTree
     var isOnEditMode = false
+    val viewTreeManager = ViewTreeManager(this::handleUndoFABVisibility)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initRootPolygon()
-        fab.setOnClickListener {
+        edit_fab.setOnClickListener {
             if(!isOnEditMode) {
                 isOnEditMode = true
-                it.setBackgroundResource(R.drawable.ic_close)
+                (it as AnimFloatingActionButton).animateAvdFirst()
                 guideline_view.visibility = View.GONE
             } else {
                 isOnEditMode = false
-                it.setBackgroundResource(R.drawable.ic_edit)
+                (it as AnimFloatingActionButton).animateAvdSecond()
                 guideline_view.visibility = View.VISIBLE
+            }
+        }
+        undo_fab.setOnClickListener {
+            GlobalScope.launch {
+                viewTreeManager.clearActivePolygonsUndoAction()
+            }
+        }
+    }
+
+    private fun handleUndoFABVisibility(show : Boolean) {
+        runOnUiThread {
+            if (show && !undo_fab.isVisible) {
+                undo_fab.show()
+            } else if (!show && undo_fab.isVisible) {
+                undo_fab.hide()
             }
         }
     }
@@ -41,19 +58,20 @@ class MainActivity : AppCompatActivity() {
         val x = resources.displayMetrics.widthPixels.toFloat()
         val y = resources.displayMetrics.heightPixels.toFloat()
         val points = getPointsList(0f ,0f ,x, y)
-        test_polygon.setVertexPoints(points, x , y,
+        root_polygon.setVertexPoints(points, x , y,
             RectData(0f, x, 0f, y)
         )
-        test_polygon.setUniqueId("0")
-        rootViewTree = ViewTree(test_polygon)
+        root_polygon.setUniqueId("0")
+        root_polygon.setListener(viewAction)
+        val root = ViewTree(root_polygon)
+        viewTreeManager.initViewTree(root)
     }
 
     val viewAction = object :
         Action<ChildPolygonsData> {
         override fun run(value: ChildPolygonsData) {
             GlobalScope.launch {
-                undoViewStack.add(value.parentPolygonId)
-                addChildren(rootViewTree, value)
+                viewTreeManager.addChildren(value)
             }
         }
     }
@@ -67,21 +85,17 @@ class MainActivity : AppCompatActivity() {
 
     fun splitView(start : Point, end : Point) {
         GlobalScope.launch {
-            getActivePolygonsList(rootViewTree).forEach {
-                it.splitView(start, end)
-            }
+            viewTreeManager.splitActivePolygonsList(start, end)
         }
     }
 
     override fun onStart() {
         super.onStart()
-        test_polygon.setListener(viewAction)
         guideline_view.setListener(action)
     }
 
     override fun onStop() {
         super.onStop()
-        test_polygon.setListener(null)
         guideline_view.setListener(null)
     }
 }

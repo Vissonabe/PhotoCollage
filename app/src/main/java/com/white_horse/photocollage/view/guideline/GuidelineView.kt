@@ -90,15 +90,16 @@ class GuidelineView : View {
         super.onDraw(canvas)
         if (actionMasked == MotionEvent.ACTION_MOVE) {
             canvas?.drawLine(downX, downY, upX, upY, guideLinePaint)
-        } else if (actionMasked == MotionEvent.ACTION_UP &&
-            viewManager.isLineGreaterThanThreshold(downX, downY, upX, upY)) {
-            canvas?.drawLine(
-                virtualStartPoint.x,
-                virtualStartPoint.y,
-                virtualEndPoint.x,
-                virtualEndPoint.y,
-                vertualLinePaint
-            )
         }
+//        else if (actionMasked == MotionEvent.ACTION_UP &&
+//            viewManager.isLineGreaterThanThreshold(downX, downY, upX, upY)) {
+//            canvas?.drawLine(
+//                virtualStartPoint.x,
+//                virtualStartPoint.y,
+//                virtualEndPoint.x,
+//                virtualEndPoint.y,
+//                vertualLinePaint
+//            )
+//        }
     }
 }
